@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador Didático de Cibersegurança</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom CSS (reduzido) -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container-xl py-4">
+    <!-- Header -->
+    <header class="mb-4">
+      <div class="card header-card border-0">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap py-4">
+          <div class="flex-grow-1">
+            <h1 class="mb-2 display-6 fw-bold">Simulador de Cibersegurança</h1>
+            <div class="text-muted subtext">Pratique Phishing, Senhas e Autenticação de dois fatores (2FA) — Aprenda na prática</div>
+          </div>
+          <div class="score-box text-end px-3 py-2 rounded">
+            <div class="text-muted subtext small">Pontuação:</div>
+            <div id="score" class="h3 mb-0 fw-bold">0</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="mb-4">
+      <div class="d-flex gap-2 flex-wrap">
+        <button id="btn-home" class="btn nav-btn btn-outline-primary active" data-module="home">Menu</button>
+        <button id="btn-phishing" class="btn nav-btn btn-outline-primary" data-module="phishing">Phishing</button>
+        <button id="btn-senha" class="btn nav-btn btn-outline-primary" data-module="senha">Teste de Senha</button>
+        <button id="btn-2fa" class="btn nav-btn btn-outline-primary" data-module="tfa">Simulação de 2FA</button>
+        <button id="btn-result" class="btn nav-btn btn-outline-primary" data-module="results">Resultados</button>
+      </div>
+    </nav>
+
+    <!-- HOME -->
+    <section id="home" class="card module-section border-0 active">
+      <div class="card-body p-4">
+        <h2 class="mb-3 h4">Bem-vindo ao Simulador</h2>
+        <p class="text-muted mb-4">Escolha um módulo para começar a praticar. O sistema soma pontos por acertos e mostra explicações ao final de cada exercício.</p>
+        
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="stat-card text-center p-3 rounded">
+              <div class="stat-number h2 fw-bold" id="total-attempts">0</div>
+              <div class="stat-label text-muted small">Tentativas</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="stat-card text-center p-3 rounded">
+              <div class="stat-number h2 fw-bold" id="success-rate">0%</div>
+              <div class="stat-label text-muted small">Taxa de Acerto</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="stat-card text-center p-3 rounded">
+              <div class="stat-number h2 fw-bold" id="modules-completed">0</div>
+              <div class="stat-label text-muted small">Módulos Concluídos</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-lg-4">
+            <button class="btn module-btn w-100 h-100 p-3 text-start" data-target="phishing">
+              <span class="btn-icon d-block fs-1 mb-2">🎣</span>
+              <span class="d-block fw-semibold">Detector de Phishing</span>
+              <small class="text-light opacity-75">Aprenda a identificar e-mails maliciosos</small>
+            </button>
+          </div>
+          <div class="col-lg-4">
+            <button class="btn module-btn w-100 h-100 p-3 text-start" data-target="senha">
+              <span class="btn-icon d-block fs-1 mb-2">🔒</span>
+              <span class="d-block fw-semibold">Teste de Senha</span>
+              <small class="text-muted">Avalie a força das suas senhas</small>
+            </button>
+          </div>
+          <div class="col-lg-4">
+            <button class="btn module-btn w-100 h-100 p-3 text-start" data-target="tfa">
+              <span class="btn-icon d-block fs-1 mb-2">📱</span>
+              <span class="d-block fw-semibold">Simulação 2FA</span>
+              <small class="text-muted">Pratique autenticação de dois fatores</small>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHISHING -->
+    <section id="phishing" class="card module-section border-0 d-none">
+      <div class="card-body p-4">
+        <h2 class="mb-4 h4">Módulo 1 — Detector de Phishing</h2>
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="progress-bar flex-grow-1" style="height: 8px;">
+            <div class="progress-fill h-100" id="phishing-progress"></div>
+          </div>
+            <span class="progress-text">Email <span id="current-email">1</span> de <span id="total-emails">7</span></span>
+</div>
+
+
+        <div id="email-box" class="email-container mb-4 rounded">
+          <div class="email-header p-3">
+            <div class="d-flex justify-content-between flex-wrap gap-2">
+              <div class="email-from small">De: <span id="email-sender" class="fw-semibold"></span></div>
+              <div class="email-date text-muted small" id="email-date"></div>
+            </div>
+            <div class="email-subject small mt-2">Assunto: <span id="email-subject" class="fw-semibold"></span></div>
+          </div>
+          <div class="email-body p-4" id="email-content"></div>
+        </div>
+
+        <div class="d-flex gap-3 justify-content-center mb-4 flex-wrap">
+          <button id="trust-btn" class="btn action-btn safe fw-semibold">
+            <span class="me-2">✓</span> Confiar
+          </button>
+          <button id="distrust-btn" class="btn action-btn danger fw-semibold">
+            <span class="me-2">⚠</span> Desconfiar
+          </button>
+        </div>
+
+        <div id="phish-feedback" class="feedback-box d-none mb-4 p-3 rounded"></div>
+        
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+          <button id="next-email" class="btn btn-primary d-none">Próximo Email</button>
+          <button id="restart-phishing" class="btn btn-outline-secondary">Reiniciar Módulo</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SENHA -->
+    <section id="senha" class="card module-section border-0 d-none">
+      <div class="card-body p-4">
+        <h2 class="mb-3 h4">Módulo 2 — Teste de Força de Senha</h2>
+        <p class="text-muted mb-4">Digite uma senha para ver a avaliação em tempo real e dicas de como torná-la mais segura.</p>
+
+        <div class="password-container">
+          <div class="input-group mb-3 position-relative">
+            <input id="pwd-input" type="password" class="form-control" placeholder="Digite uma senha..." autocomplete="new-password" />
+            <button id="pwd-toggle" class="btn toggle-btn position-absolute end-0 top-50 translate-middle-y me-2" type="button">👁</button>
+          </div>
+
+          <!-- Barra de força animada -->
+          <div class="strength-meter mb-4">
+            <div class="meter-bar mb-2" style="height: 12px;">
+              <span id="pwd-meter" class="meter-fill h-100 d-block"></span>
+            </div>
+            <div class="meter-labels d-flex justify-content-between small text-muted">
+              <span>Fraca</span>
+              <span>Média</span>
+              <span>Forte</span>
+              <span>Muito Forte</span>
+            </div>
+          </div>
+
+          <!-- Info da senha -->
+          <div class="pwd-stats row g-3 mb-4 p-3 rounded text-align-center">
+            <div class="col-md-4">
+              <div class="stat-item">
+                <span class="stat-label text-muted">Pontuação:</span>
+                <span id="pwd-score" class="stat-value fw-bold fs-5">0</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="stat-item ">
+                <span class="stat-label text-muted mb-1">Categoria:</span>
+                <span id="pwd-category" class="stat-value fw-bold fs-5">—</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="stat-item ">
+                <span class="stat-label text-muted mb-1">Tempo para quebrar:</span>
+                <span id="pwd-crack-time" class="stat-value fw-bold fs-5">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Checklist de requisitos -->
+          <div class="requirements-list mb-4">
+            <h4 class="mb-3 h5">Requisitos de Segurança:</h4>
+            <div class="requirement mb-2 d-flex align-items-center" id="req-length">
+              <span class="req-icon me-2"></span>
+              <span>Pelo menos 8 caracteres</span>
+            </div>
+            <div class="requirement mb-2 d-flex align-items-center" id="req-uppercase">
+              <span class="req-icon me-2"></span>
+              <span>Letras maiúsculas</span>
+            </div>
+            <div class="requirement mb-2 d-flex align-items-center" id="req-lowercase">
+              <span class="req-icon me-2"></span>
+              <span>Letras minúsculas</span>
+            </div>
+            <div class="requirement mb-2 d-flex align-items-center" id="req-numbers">
+              <span class="req-icon me-2"></span>
+              <span>Números</span>
+            </div>
+            <div class="requirement mb-2 d-flex align-items-center" id="req-special">
+              <span class="req-icon me-2"></span>
+              <span>Caracteres especiais</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap mb-4">
+          <button id="pwd-generate" class="btn btn-primary">Gerar Senha Segura</button>
+          <button id="pwd-save" class="btn btn-outline-secondary">Salvar Resultado</button>
+          <button id="pwd-reset" class="btn btn-outline-secondary">Limpar</button>
+        </div>
+
+        <div id="pwd-explain" class="tips-box d-none p-3 rounded">
+          <h4 class="h5">💡 Dicas para uma senha mais segura:</h4>
+          <ul id="pwd-tips" class="mb-0"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2FA -->
+  <section id="tfa" class="card module-section border-0 d-none">
+  <div class="card-body p-4">
+    <h2 class="mb-4 h4">Módulo 3 — Simulação de Autenticação 2FA</h2>
+    
+    <div class="tfa-steps d-flex justify-content-between mb-5 position-relative" style="max-width: 500px; margin: 0 auto;">
+      <div class="step text-center active" data-step="1" style="flex: 1; position: relative; z-index: 2;">
+        <span class="step-number d-inline-flex align-items-center justify-content-center rounded-circle mb-2" style="width: 50px; height: 50px; font-size: 1.2rem;">1</span>
+        <span class="small fw-semibold">Login</span>
+      </div>
+      <div class="step text-center" data-step="2" style="flex: 1; position: relative; z-index: 2;">
+        <span class="step-number d-inline-flex align-items-center justify-content-center rounded-circle mb-2" style="width: 50px; height: 50px; font-size: 1.2rem;">2</span>
+        <span class="small fw-semibold">Método 2FA</span>
+      </div>
+      <div class="step text-center" data-step="3" style="flex: 1; position: relative; z-index: 2;">
+        <span class="step-number d-inline-flex align-items-center justify-content-center rounded-circle mb-2" style="width: 50px; height: 50px; font-size: 1.2rem;">3</span>
+        <span class="small fw-semibold">Verificação</span>
+      </div>
+    </div>
+
+
+        <!-- Etapa 1: Login -->
+<div id="tfa-step1" class="tfa-step">
+  <p class="text-muted mb-4">Faça um login simulado com as credenciais: <strong>usuário:</strong> aluno | <strong>senha:</strong> senha123</p>
+  
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="mb-3">
+        <label for="tfa-user" class="form-label">Usuário:</label>
+        <input id="tfa-user" type="text" class="form-control" placeholder="Digite seu usuário" />
+      </div>
+      
+      <div class="mb-4">
+        <label for="tfa-pass" class="form-label">Senha:</label>
+        <input id="tfa-pass" type="password" class="form-control" placeholder="Digite sua senha" />
+      </div>
+      
+      <div class="d-flex gap-2">
+        <button id="tfa-login" class="btn btn-primary">Fazer Login</button>
+        <button id="tfa-reset" class="btn btn-outline-secondary">Limpar Campos</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <!-- Etapa 2: Escolha do método 2FA -->
+        <div id="tfa-step2" class="tfa-step d-none">
+          <h3 class="mb-3 h5">Escolha o método de autenticação</h3>
+          <p class="text-muted mb-4">Selecione como deseja receber o código de verificação:</p>
+          
+          <div class="tfa-methods row g-3 mb-4">
+            <div class="col-lg-4">
+              <label class="method-option">
+                <input type="radio" name="tfa-method" value="sms" checked class="d-none">
+                <div class="method-card text-center p-3 rounded">
+                  <span class="method-icon d-block fs-1 mb-2">📱</span>
+                  <span class="method-name d-block fw-semibold">SMS</span>
+                  <small class="text-muted">Receber por mensagem de texto</small>
+                </div>
+              </label>
+            </div>
+            
+            <div class="col-lg-4">
+              <label class="method-option">
+                <input type="radio" name="tfa-method" value="app" class="d-none">
+                <div class="method-card text-center p-3 rounded">
+                  <span class="method-icon d-block fs-1 mb-2">📲</span>
+                  <span class="method-name d-block fw-semibold">App Autenticador</span>
+                  <small class="text-muted">Google Authenticator, Authy, etc.</small>
+                </div>
+              </label>
+            </div>
+            
+            <div class="col-lg-4">
+              <label class="method-option">
+                <input type="radio" name="tfa-method" value="email" class="d-none">
+                <div class="method-card text-center p-3 rounded">
+                  <span class="method-icon d-block fs-1 mb-2">📧</span>
+                  <span class="method-name d-block fw-semibold">E-mail</span>
+                  <small class="text-muted">Receber por e-mail</small>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <button id="tfa-generate" class="btn btn-primary">Gerar Código</button>
+            <div class="attempts-info text-muted small">
+              <span>Tentativas restantes: <strong id="attempts-remaining">3</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Etapa 3: Verificação do código -->
+        <div id="tfa-step3" class="tfa-step d-none">
+          <h3 class="mb-4 h5">Verificação do Código</h3>
+          
+          <div class="code-display mb-4 p-4 rounded text-center">
+            <div class="code-info mb-3 text-muted">
+              <span id="selected-method">SMS</span> - Código simulado enviado
+            </div>
+            <div class="generated-code d-flex align-items-center justify-content-center gap-3 mb-3 flex-wrap">
+              <span class="code-label text-muted">Código gerado:</span>
+              <span id="generated-code" class="code-value px-3 py-2 rounded">------</span>
+              <button id="copy-code" class="btn copy-btn" title="Copiar código">📋</button>
+            </div>
+            <div class="code-timer text-warning">
+              <span>Código expira em: <span id="countdown">05:00</span></span>
+            </div>
+          </div>
+
+          <div class="verification-form row justify-content-center">
+            <div class="col-md-6">
+              <div class="mb-4">
+                <label for="tfa-code" class="form-label">Digite o código recebido:</label>
+                <input id="tfa-code" type="text" class="form-control text-center" placeholder="000000" maxlength="6" pattern="[0-9]{6}" />
+              </div>
+              
+              <div class="d-flex gap-2 justify-content-center">
+                <button id="tfa-verify" class="btn btn-primary">Verificar Código</button>
+                <button id="tfa-regenerate" class="btn btn-outline-secondary">Gerar Novo Código</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="tfa-feedback" class="feedback-box d-none mt-4 p-3 rounded"></div>
+        </div>
+
+        <!-- Histórico de tentativas -->
+        <div class="attempts-history mt-5">
+          <h4 class="mb-3 h5">Histórico de Tentativas:</h4>
+          <div id="tfa-attempts" class="attempts-list rounded"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTADOS -->
+    <section id="results" class="card module-section border-0 d-none">
+      <div class="card-body p-4">
+        <h2 class="mb-4 h4">Resultados & Estatísticas</h2>
+        
+        <div class="results-summary mb-5">
+          <div class="summary-card p-4 rounded">
+            <h3 class="mb-4 h5">Resumo Geral</h3>
+            <div class="summary-stats row g-4">
+              <div class="col-md-6">
+                <div class="summary-item text-center">
+                  <span class="summary-value d-block h2 fw-bold" id="total-score">0</span>
+                  <span class="summary-label text-muted">Pontos Totais</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="summary-item text-center">
+                  <span class="summary-value d-block h2 fw-bold" id="completion-rate">0%</span>
+                  <span class="summary-label text-muted">Taxa de Conclusão</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="results-modules row g-3 mb-5">
+          <div class="col-lg-4">
+            <div class="module-result p-3 rounded" data-module="phishing">
+              <h4 class="h5">🎣 Phishing</h4>
+              <div class="result-stats">
+                <div class="d-flex justify-content-between">
+                  <span>Acertos: <strong id="phishing-correct">0</strong></span>
+                  <span>Erros: <strong id="phishing-wrong">0</strong></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Total:</span>
+                  <strong id="phishing-total">0</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-4">
+            <div class="module-result p-3 rounded" data-module="senha">
+              <h4 class="h5">🔒 Senhas</h4>
+              <div class="result-stats">
+                <div class="d-flex justify-content-between">
+                  <span>Melhor pontuação:</span>
+                  <strong id="senha-best">0</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Tentativas:</span>
+                  <strong id="senha-attempts">0</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-lg-4">
+            <div class="module-result p-3 rounded" data-module="tfa">
+              <h4 class="h5">📱 2FA</h4>
+              <div class="result-stats">
+                <div class="d-flex justify-content-between">
+                  <span>Sucessos:</span>
+                  <strong id="tfa-success">0</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Tentativas:</span>
+                  <strong id="tfa-attempts-count">0</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <h3 class="mb-3 h5">Histórico Detalhado</h3>
+          <div class="d-flex gap-2 mb-4 flex-wrap">
+            <button id="export-results" class="btn btn-primary">Exportar Resultados</button>
+            <button id="reset-history" class="btn btn-danger">Zerar Histórico</button>
+          </div>
+          <div id="history-list" class="history-container rounded"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-5 pt-4 border-top border-secondary">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <span class="text-muted">Desenvolvido como protótipo didático</span>
+      </div>
+    </footer>
+  </div>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
